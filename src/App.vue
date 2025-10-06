@@ -1,11 +1,11 @@
-<script setup></script>
+<script setup>
+import VolunteerList from './components/Volunteerlist.vue'
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div id="list">
+    <VolunteerList />
+  </div>
 </template>
 
 <style scoped></style>
