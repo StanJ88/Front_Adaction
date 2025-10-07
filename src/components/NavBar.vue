@@ -83,7 +83,6 @@
 
 <script setup>
 import NavbarLink from './NavbarLink.vue';
-import NavabarLink from './NavbarLink.vue';
 </script>
 
 <style>

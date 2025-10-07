@@ -1,8 +1,5 @@
 <template>
-  <a
-    :href="to"
-    class="navbar-link"
-  >
+  <a :href="to" class="navbar-link">
     <slot></slot>
   </a>
 </template>
@@ -16,6 +13,4 @@ defineProps({
 });
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

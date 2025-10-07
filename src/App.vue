@@ -1,16 +1,17 @@
 <template>
   <div>
-    <TheHeader />
-    <NavBar />
+<WasteCollection/>
+
+
     <main>
     </main>
   </div>
 </template>
 
 <script setup>
-import NavBar from './components/NavBar.vue';
-import TheHeader from './components/TheHeader.vue';
 import './assets/main.css';
-
+import Dashboard from './views/Dashboard.vue';
+import ProfilVolunteer from './views/ProfilVolunteer.vue';
+import WasteCollection from './views/WasteCollection.vue';
 
 </script>
