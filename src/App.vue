@@ -1,13 +1,13 @@
 <script setup>
-import VolunteerList from './components/Volunteerlist.vue'
+import VolunteerList from './components/VolunteerList.vue'
+import './assets/main.css'
 import CollectAsso from './components/CollectAsso.vue'
+
+//import CollectAsso from './components/CollectAsso.vue'
 </script>
 
 <template>
-  <div id="list">
-    <VolunteerList />
-    <CollectAsso />
-  </div>
+  <VolunteerList />
 </template>
 
 <style scoped></style>

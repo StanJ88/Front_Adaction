@@ -27,7 +27,33 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+.submit-btn,
+.donate-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
 
+.submit-btn:hover:not(:disabled),
+.donate-btn:hover:not(:disabled) {
+  background-color: #047857;
+}
+
+.submit-btn:disabled,
+.donate-btn:disabled {
+  background-color: var(--text-secondary);
+  cursor: not-allowed;
+}
 /* Input and Select styles */
 input[type='text'],
 input[type='date'],
@@ -73,7 +99,24 @@ footer {
 }
 
 /* Card styles */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+}
 
+.card-header {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+}
 /* Header */
 .header {
   background-color: #059669;
@@ -131,18 +174,6 @@ footer {
 }
 
 /* Form styles */
-.form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: var(--text-color);
-}
 
 /* Waste type buttons */
 .waste-types-grid {
@@ -633,14 +664,14 @@ footer {
 /* Volunteers management styles */
 
 /* Leaderboard styles */
-.leaderboard-container {
+.collectAsso-container {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   margin-top: 1rem;
 }
 
-.leaderboard-item {
+.collectAsso-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -653,7 +684,7 @@ footer {
     box-shadow 0.2s;
 }
 
-.leaderboard-item:hover {
+.collectAsso-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }

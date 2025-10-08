@@ -1,9 +1,10 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { Pen } from 'lucide-vue-next'
-import { Trash2 } from 'lucide-vue-next'
+import { computed, ref, onMounted } from 'vue'
+import { Pen, Trash2 } from 'lucide-vue-next'
+import AddVolunteer from './AddVolunteer.vue'
 
-// tableau  pour  les bénévoles
+const showModal = ref(false)
+const editingVolunteer = ref(null)
 const volunteers = ref([
   { id: 1, name: 'Rachel Green', city: 'Paris' },
   { id: 2, name: 'Chandler Bing', city: 'Lyon' },
@@ -11,6 +12,13 @@ const volunteers = ref([
   { id: 4, name: 'Ross Geller', city: 'Paris' },
   { id: 5, name: 'Monica Geller', city: 'Lyon' },
 ])
+const editVolunteer = (volunteer) => {
+  editingVolunteer.value = { ...volunteer }
+  showModal.value = true
+}
+const deleteVolunteer = (volunteerId) => {
+  volunteers.value = volunteers.value.filter((v) => v.id !== volunteerId)
+}
 
 //  recherche
 const searchQuery = ref('')
@@ -40,6 +48,27 @@ const filteredVolunteers = computed(() => {
     return matchesName && matchesCity
   })
 })
+const addOrUpdateVolunteer = (formValue) => {
+  if (editingVolunteer.value) {
+    // Mode édition : on met à jour l'existant
+    const index = volunteers.value.findIndex((v) => v.id === editingVolunteer.value.id)
+    if (index !== -1) {
+      volunteers.value[index] = {
+        ...volunteers.value[index],
+        name: `${formValue.firstName} ${formValue.lastName}`,
+        city: formValue.location,
+      }
+    }
+  } else {
+    // Mode ajout
+    volunteers.value.push({
+      id: Date.now(),
+      name: `${formValue.firstName} ${formValue.lastName}`,
+      city: formValue.location,
+    })
+  }
+  showModal.value = false
+}
 </script>
 
 <template>
@@ -48,7 +77,7 @@ const filteredVolunteers = computed(() => {
     <div class="card">
       <div class="actions-list">
         <div class="submit-btn">
-          <button>Ajouter un.e bénévole</button>
+          <button @click="showModal = true">Ajouter un.e bénévole</button>
         </div>
 
         <div class="search-filters">
@@ -82,37 +111,31 @@ const filteredVolunteers = computed(() => {
           <h3 class="volunteer-info">{{ volunteer.name }}</h3>
           <p class="volunteer-city">{{ volunteer.city }}</p>
           <div class="volunteers-actions">
-            <button class="action-btn edit-btn"><Pen /></button>
-            <button class="action-btn delete-btn"><Trash2 /></button>
+            <button class="action-btn edit-btn" @click="editVolunteer(volunteer)"><Pen /></button>
+            <button class="action-btn delete-btn" @click="deleteVolunteer(volunteer.id)">
+              <Trash2 />
+            </button>
           </div>
         </div>
 
         <div v-else class="no-results">Aucun bénévole trouvé.</div>
       </div>
+      <AddVolunteer
+        v-if="showModal"
+        @submitForm="addOrUpdateVolunteer"
+        @close="
+          () => {
+            showModal = false
+            editingVolunteer = null
+          }
+        "
+      />
     </div>
   </main>
   <footer></footer>
 </template>
 
 <style scoped>
-.card {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
-}
-
-.card-header {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  text-align: center;
-}
 .actions-list {
   display: flex;
   flex-direction: column;
@@ -245,32 +268,5 @@ const filteredVolunteers = computed(() => {
   padding: 2rem;
   color: #6b7280;
   font-size: 0.875rem;
-}
-.submit-btn,
-.donate-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 1rem;
-  background-color: var(--primary-color);
-  color: white;
-  border-radius: 0.5rem;
-  border: none;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.submit-btn:hover:not(:disabled),
-.donate-btn:hover:not(:disabled) {
-  background-color: #047857;
-}
-
-.submit-btn:disabled,
-.donate-btn:disabled {
-  background-color: var(--text-secondary);
-  cursor: not-allowed;
 }
 </style>
