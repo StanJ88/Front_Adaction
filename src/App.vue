@@ -1,6 +1,6 @@
 <template>
   <div>
-<WasteCollection/>
+<ProfilVolunteer/>
 
 
     <main>
@@ -13,5 +13,6 @@ import './assets/main.css';
 import Dashboard from './views/Dashboard.vue';
 import ProfilVolunteer from './views/ProfilVolunteer.vue';
 import WasteCollection from './views/WasteCollection.vue';
+
 
 </script>

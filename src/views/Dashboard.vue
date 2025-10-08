@@ -7,19 +7,22 @@
         <div class="card">
           <div class="dashboard-header">
             <h2 class="card-header">Bonjour Bob !</h2>
-            <div class="month-navigtion">
-              <button class="month-nav-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round" class="lucide lucide-chevron-left-icon lucide-chevron-left">
+            <div class="month-navigation">
+              <button class="month-nav-btn" @click="prevMonth">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-chevron-left-icon lucide-chevron-left">
                   <path d="m15 18-6-6 6-6" />
                 </svg>
               </button>
-              <span class="current-month">octobre 2025</span>
-              <button class="month-nav-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round" class="lucide lucide-chevron-right-icon lucide-chevron-right">
+              <span class="current-month">{{ currentMonthName }} {{ currentYear }}</span>
+              <button class="month-nav-btn" @click="nextMonth">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-chevron-right-icon lucide-chevron-right">
                   <path d="m9 18 6-6-6-6" />
-                </svg></button>
+                </svg>
+              </button>
             </div>
           </div>
 
@@ -143,6 +146,41 @@ import TheFooter from '@/components/TheFooter.vue'
 import NavBar from '@/components/NavBar.vue'
 import TheHeader from '@/components/TheHeader.vue'
 </script>
-<style scoped>
-
-</style> 
+<script>
+export default {
+  data() {
+    return {
+      months: [
+        "janvier", "février", "mars", "avril", "mai", "juin",
+        "juillet", "août", "septembre", "octobre", "novembre", "décembre"
+      ],
+      currentMonth: new Date().getMonth(),
+      currentYear: new Date().getFullYear(),
+    };
+  },
+  computed: {
+    currentMonthName() {
+      return this.months[this.currentMonth];
+    },
+  },
+  methods: {
+    prevMonth() {
+      if (this.currentMonth === 0) {
+        this.currentMonth = 11;
+        this.currentYear--;
+      } else {
+        this.currentMonth--;
+      }
+    },
+    nextMonth() {
+      if (this.currentMonth === 11) {
+        this.currentMonth = 0;
+        this.currentYear++;
+      } else {
+        this.currentMonth++;
+      }
+    },
+  },
+};
+</script>
+<style scoped></style>
