@@ -2,6 +2,9 @@
 import { computed, ref, onMounted } from 'vue'
 import { Pen, Trash2 } from 'lucide-vue-next'
 import AddVolunteer from './AddVolunteer.vue'
+import TheHeader from './TheHeader.vue'
+import NavBar from './NavBar.vue'
+import TheFooter from './TheFooter.vue'
 
 const showModal = ref(false)
 const editingVolunteer = ref(null)
@@ -72,7 +75,10 @@ const addOrUpdateVolunteer = (formValue) => {
 </script>
 
 <template>
-  <header></header>
+  <header>
+    <TheHeader />
+  </header>
+  <NavBar />
   <main>
     <div class="card">
       <div class="actions-list">
@@ -132,7 +138,9 @@ const addOrUpdateVolunteer = (formValue) => {
       />
     </div>
   </main>
-  <footer></footer>
+  <footer>
+    <TheFooter />
+  </footer>
 </template>
 
 <style scoped>
