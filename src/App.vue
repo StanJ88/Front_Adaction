@@ -7,7 +7,11 @@ import CollectAsso from './components/CollectAsso.vue'
 </script>
 
 <template>
-  <VolunteerList />
+  <main>
+    <VolunteerList />
+    <div>
+      <ProfilVolunteer />
+    </div>
+  </main>
 </template>
 
-<style scoped></style>
