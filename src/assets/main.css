@@ -1,3 +1,5 @@
+@import 'tailwindcss';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -90,7 +92,6 @@ footer {
   width: 100%;
   text-align: center;
 }
-
 /* Header */
 .header {
   background-color: #059669;
@@ -500,7 +501,9 @@ footer {
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
   border: 1px solid var(--border-color);
 }
 
@@ -561,7 +564,9 @@ footer {
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;
   padding: 1rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .association-card:hover {
@@ -737,80 +742,16 @@ footer {
 }
 
 /* Volunteers management styles */
-.volunteers-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.search-filters {
-  display: flex;
-  gap: 1rem;
-  width: 100%;
-}
-
-.search-container,
-.location-filter {
-  position: relative;
-  flex: 1;
-}
-
-.search-icon {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #6b7280;
-  pointer-events: none;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  color: #374151;
-  transition: all 0.2s;
-  background-color: white;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #059669;
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.1);
-}
-
-.search-input::placeholder {
-  color: #9ca3af;
-}
-
-.location-filter select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 1rem;
-  padding-right: 2.5rem;
-}
-
-.no-results {
-  text-align: center;
-  padding: 2rem;
-  color: #6b7280;
-  font-size: 0.875rem;
-}
 
 /* Leaderboard styles */
-.leaderboard-container {
+.collectAsso-container {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   margin-top: 1rem;
 }
 
-.leaderboard-item {
+.collectAsso-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -818,10 +759,12 @@ footer {
   background-color: white;
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
-.leaderboard-item:hover {
+.collectAsso-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -830,7 +773,6 @@ footer {
   display: flex;
   align-items: center;
   gap: 1rem;
-  flex: 1;
 }
 
 .volunteer-info h3 {
@@ -845,3 +787,4 @@ footer {
   color: #6b7280;
   font-size: 0.875rem;
 }
+

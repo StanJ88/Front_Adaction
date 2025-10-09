@@ -1,18 +1,17 @@
+<script setup>
+import VolunteerList from './components/VolunteerList.vue'
+import './assets/main.css'
+import CollectAsso from './components/CollectAsso.vue'
+
+//import CollectAsso from './components/CollectAsso.vue'
+</script>
+
 <template>
-  <div>
-<ProfilVolunteer/>
-
-
-    <main>
-    </main>
-  </div>
+  <main>
+    <VolunteerList />
+    <div>
+      <ProfilVolunteer />
+    </div>
+  </main>
 </template>
 
-<script setup>
-import './assets/main.css';
-import Dashboard from './views/Dashboard.vue';
-import ProfilVolunteer from './views/ProfilVolunteer.vue';
-import WasteCollection from './views/WasteCollection.vue';
-
-
-</script>
