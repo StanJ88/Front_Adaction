@@ -28,18 +28,19 @@ const searchQuery = ref('')
 const selectedCity = ref('Toutes les villes')
 
 // fetch initial des bénévoles
-async function fetchVolunteers() {
+async function mounted() {
   try {
-    const res = await fetch('http://localhost:3309/api/volunteers')
-    if (!res.ok) throw new Error('Erreur API')
-    volunteers.value = await res.json()
-  } catch (err) {
-    console.error('Erreur lors du chargement des bénévoles :', err)
+    const response = await fetch('http://localhost:8080/api/volunteers')
+    const data = await response.json() // <-- cette ligne échouera si le back ne renvoie pas du JSON
+    console.log(data)
+    this.volunteers = data
+  } catch (error) {
+    console.error('Erreur :', error)
   }
 }
 
 onMounted(() => {
-  fetchVolunteers()
+  mounted()
 })
 
 // liste filtrée selon searchQuery et selectedCity
