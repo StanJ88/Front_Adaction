@@ -8,70 +8,94 @@ import TheFooter from './TheFooter.vue'
 
 const showModal = ref(false)
 const editingVolunteer = ref(null)
-const volunteers = ref([
-  { id: 1, name: 'Rachel Green', city: 'Paris' },
-  { id: 2, name: 'Chandler Bing', city: 'Lyon' },
-  { id: 3, name: 'Phoebe Buffet', city: 'Nantes' },
-  { id: 4, name: 'Ross Geller', city: 'Paris' },
-  { id: 5, name: 'Monica Geller', city: 'Lyon' },
-])
+const volunteers = ref([])
+
 const editVolunteer = (volunteer) => {
   editingVolunteer.value = { ...volunteer }
   showModal.value = true
 }
+
 const deleteVolunteer = (volunteerId) => {
   volunteers.value = volunteers.value.filter((v) => v.id !== volunteerId)
 }
 
-//  recherche
+// Recherche
 const searchQuery = ref('')
 const selectedCity = ref('Toutes les villes')
 
-// fetch initial des bénévoles
-async function mounted() {
+// Fetch initial des bénévoles
+async function fetchVolunteers() {
   try {
-    const response = await fetch('http://localhost:8080/api/volunteers')
-    const data = await response.json() // <-- cette ligne échouera si le back ne renvoie pas du JSON
+    const response = await fetch('http://localhost:8081/api/volunteers')
+    const data = await response.json()
     console.log(data)
-    this.volunteers = data
+    volunteers.value = data
   } catch (error) {
     console.error('Erreur :', error)
   }
 }
 
 onMounted(() => {
-  mounted()
+  fetchVolunteers()
 })
 
-// liste filtrée selon searchQuery et selectedCity
+// Liste filtrée selon recherche et ville
 const filteredVolunteers = computed(() => {
   return volunteers.value.filter((volunteer) => {
-    const matchesName = volunteer.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const fullName = `${volunteer.firstname} ${volunteer.lastname}`.toLowerCase()
+    const matchesName = fullName.includes(searchQuery.value.toLowerCase())
+    const volunteerCityName = volunteer.city?.name || ''
     const matchesCity =
-      selectedCity.value === 'Toutes les villes' || volunteer.city === selectedCity.value
+      selectedCity.value === 'Toutes les villes' || volunteerCityName === selectedCity.value
     return matchesName && matchesCity
   })
 })
-const addOrUpdateVolunteer = (formValue) => {
-  if (editingVolunteer.value) {
-    // Mode édition : on met à jour l'existant
-    const index = volunteers.value.findIndex((v) => v.id === editingVolunteer.value.id)
-    if (index !== -1) {
-      volunteers.value[index] = {
-        ...volunteers.value[index],
-        name: `${formValue.firstName} ${formValue.lastName}`,
-        city: formValue.location,
-      }
+
+//  Ajout ou mise à jour
+const addOrUpdateVolunteer = async (formValue) => {
+  try {
+    const volunteerForm = {
+      firstname: formValue.firstname,
+      lastname: formValue.lastname,
+      mail: formValue.mail,
+      password: formValue.password,
+      cityName: formValue.location,
     }
-  } else {
-    // Mode ajout
-    volunteers.value.push({
-      id: Date.now(),
-      name: `${formValue.firstName} ${formValue.lastName}`,
-      city: formValue.location,
-    })
+
+    if (editingVolunteer.value) {
+      //  Mode édition  PUT
+      const response = await fetch(
+        `http://localhost:8081/api/volunteers/${editingVolunteer.value.id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(volunteerForm),
+        },
+      )
+
+      const updatedVolunteer = await response.json()
+      const index = volunteers.value.findIndex((v) => v.id === editingVolunteer.value.id)
+      if (index !== -1) {
+        volunteers.value[index] = updatedVolunteer
+      }
+    } else {
+      //  Mode ajout  POST
+      const response = await fetch('http://localhost:8081/api/volunteers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(volunteerForm),
+      })
+
+      const newVolunteer = await response.json()
+      volunteers.value.push(newVolunteer)
+    }
+
+    //  Ferme la fenêtre modal et réinitialise
+    showModal.value = false
+    editingVolunteer.value = null
+  } catch (error) {
+    console.error('Erreur lors de l’ajout ou de la modification :', error)
   }
-  showModal.value = false
 }
 </script>
 
@@ -115,8 +139,8 @@ const addOrUpdateVolunteer = (formValue) => {
           v-for="(volunteer, index) in filteredVolunteers"
           :key="volunteer.id || index"
         >
-          <h3 class="volunteer-info">{{ volunteer.name }}</h3>
-          <p class="volunteer-city">{{ volunteer.city }}</p>
+          <h3 class="volunteer-info">{{ volunteer.firstname }} {{ volunteer.lastname }}</h3>
+          <p class="volunteer-city">{{ volunteer.city?.name }}</p>
           <div class="volunteers-actions">
             <button class="action-btn edit-btn" @click="editVolunteer(volunteer)"><Pen /></button>
             <button class="action-btn delete-btn" @click="deleteVolunteer(volunteer.id)">
