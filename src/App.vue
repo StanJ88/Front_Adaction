@@ -7,12 +7,21 @@ import VolunteerList from './components/VolunteerList.vue'
 
 //import CollectAsso from './components/CollectAsso.vue'
 </script>
+<script>
+import Navbar from '@/components/NavBar.vue';
+
+export default {
+  components: {
+    Navbar
+  },
+};
+</script>
 
 <template>
   <main>
-    <VolunteerList />
-    <div>
-      <ProfilVolunteer />
-    </div>
+    <div id="app">
+    <router-view />
+  </div> 
+  <!--<VolunteerList/>-->
   </main>
 </template>
