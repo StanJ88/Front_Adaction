@@ -15,10 +15,6 @@ const editVolunteer = (volunteer) => {
   showModal.value = true
 }
 
-const deleteVolunteer = (volunteerId) => {
-  volunteers.value = volunteers.value.filter((v) => v.id !== volunteerId)
-}
-
 // Recherche
 const searchQuery = ref('')
 const selectedCity = ref('Toutes les villes')
@@ -28,7 +24,6 @@ async function fetchVolunteers() {
   try {
     const response = await fetch('http://localhost:8081/api/volunteers')
     const data = await response.json()
-    console.log(data)
     volunteers.value = data
   } catch (error) {
     console.error('Erreur :', error)
@@ -59,11 +54,12 @@ const addOrUpdateVolunteer = async (formValue) => {
       lastname: formValue.lastname,
       mail: formValue.mail,
       password: formValue.password,
-      cityName: formValue.location,
+      city: { id: formValue.cityId },
     }
 
     if (editingVolunteer.value) {
       //  Mode édition  PUT
+
       const response = await fetch(
         `http://localhost:8081/api/volunteers/${editingVolunteer.value.id}`,
         {
@@ -95,6 +91,27 @@ const addOrUpdateVolunteer = async (formValue) => {
     editingVolunteer.value = null
   } catch (error) {
     console.error('Erreur lors de l’ajout ou de la modification :', error)
+  }
+}
+const deleteVolunteer = async (id) => {
+  try {
+    // confirmation avant suppression
+    const confirmDelete = window.confirm('Es-tu sûr de vouloir supprimer ce bénévole ?')
+    if (!confirmDelete) return
+
+    const response = await fetch(`http://localhost:8081/api/volunteers/${id}`, {
+      method: 'DELETE',
+    })
+
+    if (response.ok) {
+      // Suppression côté frontend
+      volunteers.value = volunteers.value.filter((volunteer) => volunteer.id !== id)
+      console.log(`Bénévolesupprimé avec succès.`)
+    } else {
+      console.error('Erreur lors de la suppression du bénévole :', response.statusText)
+    }
+  } catch (error) {
+    console.error('Erreur lors de la suppression :', error)
   }
 }
 </script>

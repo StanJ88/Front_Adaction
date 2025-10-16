@@ -1,11 +1,24 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+
 const form = ref({
-  firstName: '',
-  lastName: '',
-  email: '',
+  firstname: '',
+  lastname: '',
+  mail: '',
   password: '',
-  location: '',
+  cityId: '',
+})
+
+const cities = ref([])
+
+onMounted(async () => {
+  try {
+    const res = await fetch('http://localhost:8081/api/cities')
+    if (!res.ok) throw new Error('Erreur de chargement des villes')
+    cities.value = await res.json()
+  } catch (err) {
+    console.error('Erreur chargement villes:', err)
+  }
 })
 // Émission de l'event vers le parent (App.vue)
 const emit = defineEmits(['close', 'submitForm'])
@@ -24,23 +37,28 @@ const handleSubmit = () => {
       <form class="form-container" @submit.prevent="handleSubmit">
         <div>
           <label class="form-label">Prénom</label>
-          <input required v-model="form.firstName" type="text" />
+          <input required v-model="form.firstname" type="text" />
         </div>
         <div>
           <label class="form-label">Nom</label>
-          <input required v-model="form.lastName" type="text" />
+          <input required v-model="form.lastname" type="text" />
         </div>
         <div>
           <label class="form-label">Email</label>
-          <input required v-model="form.email" type="email" />
+          <input required v-model="form.mail" type="email" />
         </div>
         <div>
           <label class="form-label">Mot de passe</label>
           <input required v-model="form.password" type="password" />
         </div>
         <div>
-          <label class="form-label">Localisation</label>
-          <input required v-model="form.location" type="text" />
+          <label class="form-label">Ville</label>
+          <select required v-model="form.cityId">
+            <option disabled value="">-- Sélectionne une ville --</option>
+            <option v-for="city in cities" :key="city.id" :value="city.id">
+              {{ city.name }}
+            </option>
+          </select>
         </div>
         <div class="modal-actions">
           <button type="submit" class="submit-btn">Ajouter</button>
