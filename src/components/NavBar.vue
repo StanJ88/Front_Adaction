@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar">
     <div class="navbar-container">
-      <NavbarLink to="/">
+      <NavbarLink to="/dashboard">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -20,7 +20,7 @@
         </svg>
         Dashboard
       </NavbarLink>
-      <NavbarLink to="/">
+      <NavbarLink to="/collectes">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -42,7 +42,7 @@
         </svg>
         Collectes
       </NavbarLink>
-      <NavbarLink to="/">
+      <NavbarLink to="/dons">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -59,7 +59,7 @@
         </svg>
         Dons
       </NavbarLink>
-      <NavbarLink to="/">
+      <NavbarLink to="/profil">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -83,6 +83,12 @@
 
 <script setup>
 import NavbarLink from './NavbarLink.vue';
+</script>
+
+<script>
+export default {
+  name: 'Navbar',
+};
 </script>
 
 <style>

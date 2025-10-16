@@ -1,16 +1,22 @@
 <template>
-  <a :href="to" class="navbar-link">
+  <router-link
+    :to="to"
+    class="navbar-link"
+    active-class="active">
     <slot></slot>
-  </a>
+  </router-link>
 </template>
 
-<script setup>
-defineProps({
-  to: {
-    type: String,
-    required: true,
+<script>
+export default {
+  name: 'NavbarLink',
+  props: {
+    to: {
+      type: String,
+      required: true,
+    },
   },
-});
+};
 </script>
 
 <style scoped></style>
