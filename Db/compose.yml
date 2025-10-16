@@ -1,7 +1,6 @@
 # Use root/example as user/password credentials
 
 services:
-
   mariadb:
     image: mariadb
     restart: always
@@ -10,14 +9,9 @@ services:
       MARIADB_USER: user
       MARIADB_PASSWORD: mypassword
       MARIADB_DATABASE: example-database
-    ports:
-      
-     3309:3306
-
+    ports: 3309:3306
 
   adminer:
     image: adminer
     restart: always
-    ports:
-      
-     8080:8080
+    ports: 8080:8080

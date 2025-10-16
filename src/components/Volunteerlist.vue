@@ -9,27 +9,24 @@ import TheFooter from './TheFooter.vue'
 const showModal = ref(false)
 const editingVolunteer = ref(null)
 const volunteers = ref([])
+
 const editVolunteer = (volunteer) => {
   editingVolunteer.value = { ...volunteer }
   showModal.value = true
 }
-const deleteVolunteer = (volunteerId) => {
-  volunteers.value = volunteers.value.filter((v) => v.id !== volunteerId)
-}
 
-//  recherche
+// Recherche
 const searchQuery = ref('')
 const selectedCity = ref('Toutes les villes')
 
-// fetch initial des bénévoles
+// Fetch initial des bénévoles
 async function fetchVolunteers() {
   try {
     const response = await fetch('http://localhost:8081/api/volunteers')
-    const data = await response.json() // <-- cette ligne échouera si le back ne renvoie pas du JSON
-    console.log(data)
+    const data = await response.json()
     volunteers.value = data
   } catch (error) {
-   //console.error('Erreur :', error)
+    console.error('Erreur :', error)
   }
 }
 
@@ -37,42 +34,93 @@ onMounted(() => {
   fetchVolunteers()
 })
 
-// liste filtrée selon searchQuery et selectedCity
+// Liste filtrée selon recherche et ville
 const filteredVolunteers = computed(() => {
   return volunteers.value.filter((volunteer) => {
-    const fullName = `${volunteer.firstname}${volunteer.lastname}`.toLowerCase()
+    const fullName = `${volunteer.firstname} ${volunteer.lastname}`.toLowerCase()
     const matchesName = fullName.includes(searchQuery.value.toLowerCase())
+    const volunteerCityName = volunteer.city?.name || ''
     const matchesCity =
-      selectedCity.value === 'Toutes les villes' || volunteer.city === selectedCity.value
+      selectedCity.value === 'Toutes les villes' || volunteerCityName === selectedCity.value
     return matchesName && matchesCity
   })
 })
-const addOrUpdateVolunteer = (formValue) => {
-  if (editingVolunteer.value) {
-    // Mode édition : on met à jour l'existant
-    const index = volunteers.value.findIndex((v) => v.id === editingVolunteer.value.id)
-    if (index !== -1) {
-      volunteers.value[index] = {
-        ...volunteers.value[index],
-        name: `${formValue.firstName} ${formValue.lastName}`,
-        city: formValue.location,
-      }
+
+//  Ajout ou mise à jour
+const addOrUpdateVolunteer = async (formValue) => {
+  try {
+    const volunteerForm = {
+      firstname: formValue.firstname,
+      lastname: formValue.lastname,
+      mail: formValue.mail,
+      password: formValue.password,
+      city: { id: formValue.cityId },
     }
-  } else {
-    // Mode ajout
-    volunteers.value.push({
-      id: Date.now(),
-      name: `${formValue.firstName} ${formValue.lastName}`,
-      city: formValue.location,
-    })
+
+    if (editingVolunteer.value) {
+      //  Mode édition  PUT
+
+      const response = await fetch(
+        `http://localhost:8081/api/volunteers/${editingVolunteer.value.id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(volunteerForm),
+        },
+      )
+
+      const updatedVolunteer = await response.json()
+      const index = volunteers.value.findIndex((v) => v.id === editingVolunteer.value.id)
+      if (index !== -1) {
+        volunteers.value[index] = updatedVolunteer
+      }
+    } else {
+      //  Mode ajout  POST
+      const response = await fetch('http://localhost:8081/api/volunteers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(volunteerForm),
+      })
+
+      const newVolunteer = await response.json()
+      volunteers.value.push(newVolunteer)
+    }
+
+    //  Ferme la fenêtre modal et réinitialise
+    showModal.value = false
+    editingVolunteer.value = null
+  } catch (error) {
+    console.error('Erreur lors de l’ajout ou de la modification :', error)
   }
-  showModal.value = false
+}
+const deleteVolunteer = async (id) => {
+  try {
+    // confirmation avant suppression
+    const confirmDelete = window.confirm('Es-tu sûr de vouloir supprimer ce bénévole ?')
+    if (!confirmDelete) return
+
+    const response = await fetch(`http://localhost:8081/api/volunteers/${id}`, {
+      method: 'DELETE',
+    })
+
+    if (response.ok) {
+      // Suppression côté frontend
+      volunteers.value = volunteers.value.filter((volunteer) => volunteer.id !== id)
+      console.log(`Bénévolesupprimé avec succès.`)
+    } else {
+      console.error('Erreur lors de la suppression du bénévole :', response.statusText)
+    }
+  } catch (error) {
+    console.error('Erreur lors de la suppression :', error)
+  }
 }
 </script>
 
 <template>
-  <TheHeader/>
-  <NavBar/>
+  <header>
+    <TheHeader />
+  </header>
+  <NavBar />
   <main>
     <div class="card">
       <div class="actions-list">
@@ -109,7 +157,7 @@ const addOrUpdateVolunteer = (formValue) => {
           :key="volunteer.id || index"
         >
           <h3 class="volunteer-info">{{ volunteer.firstname }} {{ volunteer.lastname }}</h3>
-          <p class="volunteer-city">{{ volunteer.city }}</p>
+          <p class="volunteer-city">{{ volunteer.city?.name }}</p>
           <div class="volunteers-actions">
             <button class="action-btn edit-btn" @click="editVolunteer(volunteer)"><Pen /></button>
             <button class="action-btn delete-btn" @click="deleteVolunteer(volunteer.id)">
@@ -132,7 +180,9 @@ const addOrUpdateVolunteer = (formValue) => {
       />
     </div>
   </main>
-  <TheFooter/>
+  <footer>
+    <TheFooter />
+  </footer>
 </template>
 
 <style scoped>

@@ -1,9 +1,9 @@
 <script setup>
-//import VolunteerList from './components/VolunteerList.vue'
 import './assets/main.css'
-import VolunteerList from './components/VolunteerList.vue';
-//import CollectAsso from './components/CollectAsso.vue'
-import Dashboard from './views/Dashboard.vue';
+import CollectAsso from './components/CollectAsso.vue'
+import WasteCollection from './views/WasteCollection.vue'
+import Dashboard from './views/Dashboard.vue'
+import VolunteerList from './components/VolunteerList.vue'
 
 //import CollectAsso from './components/CollectAsso.vue'
 </script>
