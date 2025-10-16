@@ -2,16 +2,13 @@
 import { computed, ref, onMounted } from 'vue'
 import { Pen, Trash2 } from 'lucide-vue-next'
 import AddVolunteer from './AddVolunteer.vue'
+import TheHeader from './TheHeader.vue'
+import NavBar from './NavBar.vue'
+import TheFooter from './TheFooter.vue'
 
 const showModal = ref(false)
 const editingVolunteer = ref(null)
-const volunteers = ref([
-  { id: 1, name: 'Rachel Green', city: 'Paris' },
-  { id: 2, name: 'Chandler Bing', city: 'Lyon' },
-  { id: 3, name: 'Phoebe Buffet', city: 'Nantes' },
-  { id: 4, name: 'Ross Geller', city: 'Paris' },
-  { id: 5, name: 'Monica Geller', city: 'Lyon' },
-])
+const volunteers = ref([])
 const editVolunteer = (volunteer) => {
   editingVolunteer.value = { ...volunteer }
   showModal.value = true
@@ -27,11 +24,12 @@ const selectedCity = ref('Toutes les villes')
 // fetch initial des bénévoles
 async function fetchVolunteers() {
   try {
-    const res = await fetch('http://localhost:3309/api/volunteers')
-    if (!res.ok) throw new Error('Erreur API')
-    volunteers.value = await res.json()
-  } catch (err) {
-    console.error('Erreur lors du chargement des bénévoles :', err)
+    const response = await fetch('http://localhost:8081/api/volunteers')
+    const data = await response.json() // <-- cette ligne échouera si le back ne renvoie pas du JSON
+    console.log(data)
+    volunteers.value = data
+  } catch (error) {
+   //console.error('Erreur :', error)
   }
 }
 
@@ -42,7 +40,8 @@ onMounted(() => {
 // liste filtrée selon searchQuery et selectedCity
 const filteredVolunteers = computed(() => {
   return volunteers.value.filter((volunteer) => {
-    const matchesName = volunteer.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const fullName = `${volunteer.firstname}${volunteer.lastname}`.toLowerCase()
+    const matchesName = fullName.includes(searchQuery.value.toLowerCase())
     const matchesCity =
       selectedCity.value === 'Toutes les villes' || volunteer.city === selectedCity.value
     return matchesName && matchesCity
@@ -72,7 +71,8 @@ const addOrUpdateVolunteer = (formValue) => {
 </script>
 
 <template>
-  <header></header>
+  <TheHeader/>
+  <NavBar/>
   <main>
     <div class="card">
       <div class="actions-list">
@@ -108,7 +108,7 @@ const addOrUpdateVolunteer = (formValue) => {
           v-for="(volunteer, index) in filteredVolunteers"
           :key="volunteer.id || index"
         >
-          <h3 class="volunteer-info">{{ volunteer.name }}</h3>
+          <h3 class="volunteer-info">{{ volunteer.firstname }} {{ volunteer.lastname }}</h3>
           <p class="volunteer-city">{{ volunteer.city }}</p>
           <div class="volunteers-actions">
             <button class="action-btn edit-btn" @click="editVolunteer(volunteer)"><Pen /></button>
@@ -132,7 +132,7 @@ const addOrUpdateVolunteer = (formValue) => {
       />
     </div>
   </main>
-  <footer></footer>
+  <TheFooter/>
 </template>
 
 <style scoped>
