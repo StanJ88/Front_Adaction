@@ -1,6 +1,17 @@
 <!-- eslint-disable vue/valid-v-for -->
 <template>
   <TheHeader />
+  <div class="success-message" v-if="successMessage">
+    <div class="success-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        class="lucide lucide-circle-check-big-icon lucide-circle-check-big">
+        <path d="M21.801 10A10 10 0 1 1 17 3.335" />
+        <path d="m9 11 3 3L22 4" />
+      </svg>
+    </div>
+    {{ successMessage }}
+  </div>
   <NavBar />
   <div class="main-content">
     <div class="card">
@@ -55,7 +66,8 @@
                       <path d="M5 12h14" />
                     </svg>
                   </button>
-                  <input type="number" min="0" class="w-16 text-center" v-model="waste.quantity">
+                  <input type="number" min="0" class="w-16 text-center" v-model="waste.quantity"
+                    @keydown="validateNumberInput" @input="sanitizeQuantity(index)">
                   <button class="p-1 rounded-full hover:bg-gray-100" @click="increment(index)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -85,14 +97,14 @@
       <h3>Mes collectes du jour</h3>
       <div class="reports-list">
         <div v-for="(collect, index) in collects" :key="index" class="report-item">
-          <div class="report-header">
+          <div class="report-header flex justify-end">
             <span class="report-timestamp">{{ collect.date }}</span>
           </div>
           <p class="report-description"></p>
           <p class="report-location">📍{{ collect.city }}</p>
           <div class="waste-quantity">
             <div v-for="(waste, wIndex) in collect.wastes" :key="wIndex" class="waste-item">
-              <span>{{ waste.value }} : {{ waste.quantity }}</span>
+              <span>{{ waste.name }} : {{ waste.quantity }}</span>
             </div>
           </div>
         </div>
@@ -107,10 +119,11 @@ import NavBar from '@/components/NavBar.vue';
 import TheFooter from '@/components/TheFooter.vue';
 import TheHeader from '@/components/TheHeader.vue';
 
-const date = ref("2025-10-08");
+const date = ref(new Date().toISOString().split('T')[0]);
 const selectedCity = ref("");
 const wasteTypes = ref([]);
 const collects = ref([]); // Pour stocker les collectes enregistrées
+const successMessage = ref("");
 
 const isFormValid = computed(() => {
   return wasteTypes.value.some(waste => waste.quantity > 0) && selectedCity.value && date.value;
@@ -123,6 +136,31 @@ const increment = (index) => {
 const decrement = (index) => {
   if (wasteTypes.value[index].quantity > 0) {
     wasteTypes.value[index].quantity--;
+  }
+};
+
+// Autoriser uniquement les chiffres et touches utiles
+const validateNumberInput = (e) => {
+  const allowedKeys = [
+    'Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete',
+  ];
+
+  // Autorise les chiffres (0–9) et touches utiles
+  if (
+    (e.key >= '0' && e.key <= '9') ||
+    allowedKeys.includes(e.key)
+  ) {
+    return;
+  } else {
+    e.preventDefault(); // bloque tout le reste (lettres, -, ., etc.)
+  }
+};
+
+// Bloquer manuellement les valeurs négatives ou NaN
+const sanitizeQuantity = (index) => {
+  const quantity = wasteTypes.value[index].quantity;
+  if (isNaN(quantity) || quantity < 0) {
+    wasteTypes.value[index].quantity = 0;
   }
 };
 
@@ -172,7 +210,6 @@ const fetchCollects = async () => {
       date: collect.date,
       wastes: collect.wastes.map(waste => {
         const wasteType = wasteTypes.value.find(wt => wt.id === waste.wasteTypeId);
-        console.log("ID du déchet :", waste.wasteTypeId, "Nom trouvé :", wasteType?.name); // Log des IDs
         return {
           name: wasteType?.name,
           quantity: waste.quantity
@@ -209,13 +246,15 @@ const submitForm = async () => {
       });
 
       if (response.ok) {
-        alert('Collecte enregistrée avec succès !');
+        successMessage.value = "Collecte enregistrée avec succès !";
+        setTimeout(() => {
+          successMessage.value = "";
+        }, 3000);
         // Réinitialisation du formulaire
         wasteTypes.value.forEach(waste => waste.quantity = 0);
         selectedCity.value = "";
-        date.value = "2025-10-16";
+        date.value = "";
         await fetchCollects();
-        console.log("Collectes après mise à jour :", collects.value);
       } else {
         alert('Erreur lors de l\'enregistrement.');
       }
