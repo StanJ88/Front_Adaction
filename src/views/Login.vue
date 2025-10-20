@@ -6,11 +6,11 @@
       <form class="form-container" @submit.prevent="handleLogin">
         <div>
           <label class="form-label">Prénom *</label>
-          <input placeholder="Votre prénom" type="text" v-model="firstname" />
+          <!--<input placeholder="Votre prénom" type="text" v-model="firstname" />-->
         </div>
         <div>
           <label class="form-label">Mot de passe *</label>
-          <input placeholder="Votre mot de passe" required type="password" v-model="password" />
+         <!--<input placeholder="Votre mot de passe" required type="password" v-model="password" />--> 
         </div>
         <button class="submit-btn" type="submit">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
