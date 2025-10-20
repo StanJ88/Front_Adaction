@@ -5,6 +5,7 @@ import AddVolunteer from './AddVolunteer.vue'
 import TheHeader from './TheHeader.vue'
 import NavBar from './NavBar.vue'
 import TheFooter from './TheFooter.vue'
+import NavBarAdmin from './NavBarAdmin.vue'
 
 const showModal = ref(false)
 const editingVolunteer = ref(null)
@@ -120,7 +121,7 @@ const deleteVolunteer = async (id) => {
   <header>
     <TheHeader />
   </header>
-  <NavBar />
+  <NavBarAdmin />
   <main>
     <div class="card">
       <div class="actions-list">
@@ -130,12 +131,7 @@ const deleteVolunteer = async (id) => {
 
         <div class="search-filters">
           <div class="search-container">
-            <input
-              type="text"
-              class="search-input"
-              placeholder="Rechercher un.e bénévole"
-              v-model="searchQuery"
-            />
+            <input type="text" class="search-input" placeholder="Rechercher un.e bénévole" v-model="searchQuery" />
           </div>
 
           <div class="location-filter">
@@ -150,16 +146,14 @@ const deleteVolunteer = async (id) => {
       </div>
 
       <div class="volunteer-list">
-        <div
-          v-if="filteredVolunteers.length"
-          class="volunteer-item"
-          v-for="(volunteer, index) in filteredVolunteers"
-          :key="volunteer.id || index"
-        >
+        <div v-if="filteredVolunteers.length" class="volunteer-item" v-for="(volunteer, index) in filteredVolunteers"
+          :key="volunteer.id || index">
           <h3 class="volunteer-info">{{ volunteer.firstname }} {{ volunteer.lastname }}</h3>
           <p class="volunteer-city">{{ volunteer.city?.name }}</p>
           <div class="volunteers-actions">
-            <button class="action-btn edit-btn" @click="editVolunteer(volunteer)"><Pen /></button>
+            <button class="action-btn edit-btn" @click="editVolunteer(volunteer)">
+              <Pen />
+            </button>
             <button class="action-btn delete-btn" @click="deleteVolunteer(volunteer.id)">
               <Trash2 />
             </button>
@@ -168,16 +162,12 @@ const deleteVolunteer = async (id) => {
 
         <div v-else class="no-results">Aucun bénévole trouvé.</div>
       </div>
-      <AddVolunteer
-        v-if="showModal"
-        @submitForm="addOrUpdateVolunteer"
-        @close="
-          () => {
-            showModal = false
-            editingVolunteer = null
-          }
-        "
-      />
+      <AddVolunteer v-if="showModal" @submitForm="addOrUpdateVolunteer" @close="
+        () => {
+          showModal = false
+          editingVolunteer = null
+        }
+      " />
     </div>
   </main>
   <footer>
@@ -233,6 +223,7 @@ const deleteVolunteer = async (id) => {
   gap: 1rem;
   margin-bottom: 1rem;
 }
+
 .action-btn {
   padding: 0.5rem;
   border: none;
@@ -319,4 +310,6 @@ const deleteVolunteer = async (id) => {
   color: #6b7280;
   font-size: 0.875rem;
 }
+
+
 </style>
