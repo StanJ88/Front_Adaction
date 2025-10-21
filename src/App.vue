@@ -1,7 +1,5 @@
 <script setup>
-import VolunteerList from '@/components/VolunteerList.vue';
 import './assets/main.css'
-
 
 //import CollectAsso from './components/CollectAsso.vue'
 </script>
@@ -9,7 +7,7 @@ import './assets/main.css'
 <template>
   <main>
     <div id="app">
-    <router-view />
-  </div> 
+      <router-view />
+    </div>
   </main>
 </template>

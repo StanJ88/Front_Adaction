@@ -123,51 +123,66 @@ const deleteVolunteer = async (id) => {
   </header>
   <NavBarAdmin />
   <main>
-    <div class="card">
-      <div class="actions-list">
-        <div class="submit-btn">
-          <button @click="showModal = true">Ajouter un.e bénévole</button>
-        </div>
-
-        <div class="search-filters">
-          <div class="search-container">
-            <input type="text" class="search-input" placeholder="Rechercher un.e bénévole" v-model="searchQuery" />
+    <div class="main-content">
+      <div class="card">
+        <div class="actions-list">
+          <div class="submit-btn">
+            <button @click="showModal = true">Ajouter un.e bénévole</button>
           </div>
 
-          <div class="location-filter">
-            <select v-model="selectedCity">
-              <option value="Toutes les villes">Toutes les villes</option>
-              <option value="Paris">Paris</option>
-              <option value="Lyon">Lyon</option>
-              <option value="Nantes">Nantes</option>
-            </select>
+          <div class="search-filters">
+            <div class="search-container">
+              <input
+                type="text"
+                class="search-input"
+                placeholder="Rechercher un.e bénévole"
+                v-model="searchQuery"
+              />
+            </div>
+
+            <div class="location-filter">
+              <select v-model="selectedCity">
+                <option value="Toutes les villes">Toutes les villes</option>
+                <option value="Paris">Paris</option>
+                <option value="Lyon">Lyon</option>
+                <option value="Nantes">Nantes</option>
+              </select>
+            </div>
           </div>
         </div>
+
+        <div class="volunteer-list">
+          <div
+            v-if="filteredVolunteers.length"
+            class="volunteer-item"
+            v-for="(volunteer, index) in filteredVolunteers"
+            :key="volunteer.id || index"
+          >
+            <h3 class="volunteer-info">{{ volunteer.firstname }} {{ volunteer.lastname }}</h3>
+            <p class="volunteer-city">{{ volunteer.city?.name }}</p>
+            <div class="volunteers-actions">
+              <button class="action-btn edit-btn" @click="editVolunteer(volunteer)">
+                <Pen />
+              </button>
+              <button class="action-btn delete-btn" @click="deleteVolunteer(volunteer.id)">
+                <Trash2 />
+              </button>
+            </div>
+          </div>
+
+          <div v-else class="no-results">Aucun bénévole trouvé.</div>
+        </div>
+        <AddVolunteer
+          v-if="showModal"
+          @submitForm="addOrUpdateVolunteer"
+          @close="
+            () => {
+              showModal = false
+              editingVolunteer = null
+            }
+          "
+        />
       </div>
-
-      <div class="volunteer-list">
-        <div v-if="filteredVolunteers.length" class="volunteer-item" v-for="(volunteer, index) in filteredVolunteers"
-          :key="volunteer.id || index">
-          <h3 class="volunteer-info">{{ volunteer.firstname }} {{ volunteer.lastname }}</h3>
-          <p class="volunteer-city">{{ volunteer.city?.name }}</p>
-          <div class="volunteers-actions">
-            <button class="action-btn edit-btn" @click="editVolunteer(volunteer)">
-              <Pen />
-            </button>
-            <button class="action-btn delete-btn" @click="deleteVolunteer(volunteer.id)">
-              <Trash2 />
-            </button>
-          </div>
-        </div>
-
-        <div v-else class="no-results">Aucun bénévole trouvé.</div>
-      </div>
-      <AddVolunteer v-if="showModal" @submitForm="addOrUpdateVolunteer" @close="
-        () => {
-          showModal = false
-          editingVolunteer = null
-        }
-      " />
     </div>
   </main>
   <footer>
@@ -310,6 +325,4 @@ const deleteVolunteer = async (id) => {
   color: #6b7280;
   font-size: 0.875rem;
 }
-
-
 </style>
