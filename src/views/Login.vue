@@ -1,5 +1,25 @@
 <template>
   <TheHeader />
+  <div class="success-message" v-if="successMessage">
+    <div class="success-icon">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="lucide lucide-circle-check-big-icon lucide-circle-check-big"
+      >
+        <path d="M21.801 10A10 10 0 1 1 17 3.335" />
+        <path d="m9 11 3 3L22 4" />
+      </svg>
+    </div>
+    {{ successMessage }}
+  </div>
   <div class="main-content">
     <div class="card">
       <h2 class="card-header">Connexion</h2>
@@ -62,13 +82,13 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const firstname = ref('')
 const password = ref('')
+const successMessage = ref('')
 
-// Fonction pour gérer la soumission du formulaire de login
 const handleLogin = async () => {
   try {
     const response = await fetch('http://localhost:8081/api/login', {
       method: 'POST',
-      credentials: 'include', // nécessaire pour la session Spring
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         firstname: firstname.value,
@@ -79,15 +99,23 @@ const handleLogin = async () => {
     if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`)
 
     const data = await response.json()
-    console.log('Réponse backend:', data)
 
     if (data.role === 'ADMIN') {
       localStorage.setItem('role', 'ADMIN')
-      alert('Connexion réussie en tant qu’ADMIN')
-      router.push('/admin/manage-users') // redirection admin
+      successMessage.value = 'Bienvenue Admin ! 🎉'
+
+      setTimeout(() => {
+        router.push('/admin/manage-users')
+        successMessage.value = ''
+      }, 2000)
     } else if (data.role === 'VOLONTAIRE') {
       localStorage.setItem('role', 'VOLONTAIRE')
-      router.push('/dashboard') // redirection volontaire
+      successMessage.value = 'Connexion réussie ! 👏'
+
+      setTimeout(() => {
+        router.push('/dashboard')
+        successMessage.value = ''
+      }, 2000)
     } else {
       alert('Identifiants incorrects')
     }
@@ -97,7 +125,7 @@ const handleLogin = async () => {
   }
 }
 
-// Fonction pour rediriger vers la gestion des bénévoles (uniquement pour les admins)
+// Fonction pour rediriger vers la gestion des bénévoles
 const goToManageUsers = async () => {
   try {
     const response = await fetch('http://localhost:8081/api/me', {

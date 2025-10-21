@@ -1,6 +1,7 @@
 <template>
   <nav class="navbar">
     <div class="navbar-container">
+      <!-- Liens existants -->
       <NavbarLink to="/admin/manage-users">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -20,8 +21,9 @@
           <path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4" />
           <path d="M5 21h14" />
         </svg>
-        Gestion des bénévoles
+        <span>Gestion des bénévoles</span>
       </NavbarLink>
+
       <NavbarLink to="/admin/leaderboard">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -42,23 +44,60 @@
           <path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z" />
           <path d="M6 9H4.5a1 1 0 0 1 0-5H6" />
         </svg>
-        Leaderboard
+        <span>Leaderboard</span>
       </NavbarLink>
+
+      <!-- Bouton Déconnexion -->
+      <button class="navbar-link logout-link" @click="handleLogout">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-log-out"
+        >
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+        <span>Déconnexion</span>
+      </button>
     </div>
   </nav>
 </template>
 
 <script setup>
 import NavbarLink from './NavbarLink.vue'
-</script>
+import { useRouter } from 'vue-router'
 
-<script>
-export default {
-  name: 'Navbar',
+const router = useRouter()
+
+const handleLogout = async () => {
+  try {
+    await fetch('http://localhost:8081/api/logout', {
+      method: 'POST',
+      credentials: 'include',
+    })
+
+    // Nettoyage du stockage local
+    localStorage.removeItem('role')
+
+    // Redirection
+    router.push('/login')
+  } catch (err) {
+    console.error('Erreur lors de la déconnexion:', err)
+    alert('Une erreur est survenue lors de la déconnexion.')
+  }
 }
 </script>
 
-<style>
+<style scoped>
+/* Garde ton design actuel */
 .navbar {
   background-color: white;
   border-bottom: 1px solid var(--border-color);
@@ -92,6 +131,13 @@ export default {
 
 .navbar-link.active {
   font-weight: 500;
+}
+
+.logout-link {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
 }
 
 /* Responsive navbar */
