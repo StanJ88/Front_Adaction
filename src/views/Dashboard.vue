@@ -6,7 +6,7 @@
       <div class="main-content">
         <div class="card">
           <div class="dashboard-header">
-            <h2 class="card-header">Bonjour{{ name }}!</h2>
+            <h2 class="card-header">Bonjour {{ volunteerFirstname || 'Bénévole' }}!</h2>
             <div class="month-navigation">
               <button class="month-nav-btn" @click="prevMonth">
                 <svg
@@ -19,7 +19,6 @@
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  class="lucide lucide-chevron-left-icon lucide-chevron-left"
                 >
                   <path d="m15 18-6-6 6-6" />
                 </svg>
@@ -36,7 +35,6 @@
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  class="lucide lucide-chevron-right-icon lucide-chevron-right"
                 >
                   <path d="m9 18 6-6-6-6" />
                 </svg>
@@ -61,7 +59,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import TheFooter from '@/components/TheFooter.vue'
 import NavBar from '@/components/NavBar.vue'
 import TheHeader from '@/components/TheHeader.vue'
@@ -73,38 +72,22 @@ import TrashIcon from '@/components/TrashIcon.vue'
 import SmartphoneIcon from '@/components/SmartphoneIcon.vue'
 import QuestionMarkIcon from '@/components/QuestionMarkIcon.vue'
 
+const route = useRoute()
+const volunteerFirstname = ref(localStorage.getItem('firstname') || 'Bénévole')
+
 const wasteTypes = ref([])
 const collects = ref([])
 
 const wasteConfig = {
-  '🚬 Mégots de cigarette': {
-    color: 'rgb(251, 191, 36)',
-    icon: CigaretteIcon,
-  },
-  '🥤 Plastique': {
-    color: 'rgb(96, 165, 250)',
-    icon: PackageIcon,
-  },
-  '🍶 Verre': {
-    color: 'rgb(52, 211, 153)',
-    icon: GlassIcon,
-  },
-  '🥫 Métal': {
-    color: 'rgb(148, 163, 184)',
-    icon: TrashIcon,
-  },
-  '📱 Électronique': {
-    color: 'rgb(167, 139, 250)',
-    icon: SmartphoneIcon,
-  },
-  '❓ Autre': {
-    color: 'rgb(248, 113, 113)',
-    icon: QuestionMarkIcon,
-  },
+  '🚬 Mégots de cigarette': { color: 'rgb(251, 191, 36)', icon: CigaretteIcon },
+  '🥤 Plastique': { color: 'rgb(96, 165, 250)', icon: PackageIcon },
+  '🍶 Verre': { color: 'rgb(52, 211, 153)', icon: GlassIcon },
+  '🥫 Métal': { color: 'rgb(148, 163, 184)', icon: TrashIcon },
+  '📱 Électronique': { color: 'rgb(167, 139, 250)', icon: SmartphoneIcon },
+  '❓ Autre': { color: 'rgb(248, 113, 113)', icon: QuestionMarkIcon },
 }
 
 function cleanWasteName(name) {
-  // Supprime les emojis et retourne le nom nettoyé
   return name.replace(/[^\p{L}\p{N}\s]/gu, '').trim()
 }
 
@@ -124,24 +107,19 @@ const months = [
 ]
 const currentMonth = ref(new Date().getMonth())
 const currentYear = ref(new Date().getFullYear())
-
 const currentMonthName = computed(() => months[currentMonth.value])
 
 function prevMonth() {
   if (currentMonth.value === 0) {
     currentMonth.value = 11
     currentYear.value--
-  } else {
-    currentMonth.value--
-  }
+  } else currentMonth.value--
 }
 function nextMonth() {
   if (currentMonth.value === 11) {
     currentMonth.value = 0
     currentYear.value++
-  } else {
-    currentMonth.value++
-  }
+  } else currentMonth.value++
 }
 
 const fetchWasteTypes = async () => {
@@ -149,11 +127,11 @@ const fetchWasteTypes = async () => {
     const response = await fetch('http://localhost:8081/api/waste-type')
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     const data = await response.json()
-    wasteTypes.value = data.map((waste) => ({
-      id: waste.id,
-      name: waste.label,
-      value: waste.value,
-      className: waste.className,
+    wasteTypes.value = data.map((w) => ({
+      id: w.id,
+      name: w.label,
+      value: w.value,
+      className: w.className,
       quantity: 0,
     }))
   } catch (error) {
@@ -161,43 +139,53 @@ const fetchWasteTypes = async () => {
   }
 }
 
-async function fetchCollects() {
+const fetchCollects = async (volunteerId) => {
   try {
-    const resp = await fetch('http://localhost:8081/api/collects')
+    const url = volunteerId
+      ? `http://localhost:8081/api/collects?volunteerId=${volunteerId}`
+      : 'http://localhost:8081/api/collects'
+    const resp = await fetch(url)
     if (!resp.ok) throw new Error('Erreur API collects')
     const data = await resp.json()
-
-    collects.value = data.map((collect) => ({
-      date: collect.date,
-      wastes: collect.wastes.map((w) => ({
-        wasteTypeId: w.wasteTypeId,
-        quantity: w.quantity,
-      })),
+    collects.value = data.map((c) => ({
+      date: c.date,
+      wastes: c.wastes.map((w) => ({ wasteTypeId: w.wasteTypeId, quantity: w.quantity })),
     }))
   } catch (err) {
     console.error('Erreur fetch collects : ', err)
   }
 }
 
-// calculer le total pour un type de déchet pour le mois courant sélectionné
 function wasteTotalForMonth(wasteTypeId) {
-  let total = 0
-  collects.value.forEach((collect) => {
+  return collects.value.reduce((total, collect) => {
     const d = new Date(collect.date)
     if (d.getMonth() === currentMonth.value && d.getFullYear() === currentYear.value) {
       collect.wastes.forEach((w) => {
-        if (w.wasteTypeId === wasteTypeId) {
-          total += w.quantity
-        }
+        if (w.wasteTypeId === wasteTypeId) total += w.quantity
       })
     }
-  })
-  return total
+    return total
+  }, 0)
+}
+
+// Relire le prénom depuis le localStorage
+const updateFirstnameFromStorage = () => {
+  volunteerFirstname.value = localStorage.getItem('firstname') || 'Bénévole'
 }
 
 onMounted(() => {
   fetchWasteTypes()
-  fetchCollects()
+  const storedVolunteerId = localStorage.getItem('volunteerId')
+  if (storedVolunteerId) fetchCollects(storedVolunteerId)
+  updateFirstnameFromStorage()
 })
+
+// Chaque fois que la route change (utile si dashboard reste monté et qu'on revient depuis ProfilVolunteer)
+watch(
+  () => route.fullPath,
+  () => {
+    updateFirstnameFromStorage()
+  },
+)
 </script>
 <style scoped></style>

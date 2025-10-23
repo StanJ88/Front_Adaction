@@ -1,5 +1,13 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+
+// Props pour recevoir le bénévole à éditer
+const props = defineProps({
+  volunteer: Object,
+})
+
+// Events vers le parent
+const emit = defineEmits(['close', 'submitForm'])
 
 const form = ref({
   firstname: '',
@@ -20,11 +28,30 @@ onMounted(async () => {
     console.error('Erreur chargement villes:', err)
   }
 })
-// Émission de l'event vers le parent (App.vue)
-const emit = defineEmits(['close', 'submitForm'])
 
+// Watch pour pré-remplir le formulaire si on édite un bénévole
+watch(
+  () => props.volunteer,
+  (newVal) => {
+    if (newVal) {
+      form.value.firstname = newVal.firstname || ''
+      form.value.lastname = newVal.lastname || ''
+      form.value.mail = newVal.mail || ''
+      form.value.password = ''
+      form.value.cityId = newVal.city?.id || ''
+    } else {
+      form.value.firstname = ''
+      form.value.lastname = ''
+      form.value.mail = ''
+      form.value.password = ''
+      form.value.cityId = ''
+    }
+  },
+  { immediate: true },
+)
+
+// Submit du formulaire
 const handleSubmit = () => {
-  console.log('Infos du bénévole :', form.value)
   emit('submitForm', form.value)
   emit('close')
 }
@@ -33,7 +60,7 @@ const handleSubmit = () => {
 <template>
   <div class="modal-overlay" @click.self="emit('close')">
     <div class="modal">
-      <h3>Ajouter un.e bénévole</h3>
+      <h3>{{ volunteer ? 'Modifier le bénévole' : 'Ajouter un.e bénévole' }}</h3>
       <form class="form-container" @submit.prevent="handleSubmit">
         <div>
           <label class="form-label">Prénom</label>
@@ -49,7 +76,7 @@ const handleSubmit = () => {
         </div>
         <div>
           <label class="form-label">Mot de passe</label>
-          <input required v-model="form.password" type="password" />
+          <input :required="!volunteer" v-model="form.password" type="password" />
         </div>
         <div>
           <label class="form-label">Ville</label>
@@ -61,7 +88,9 @@ const handleSubmit = () => {
           </select>
         </div>
         <div class="modal-actions">
-          <button type="submit" class="submit-btn">Ajouter</button>
+          <button type="submit" class="submit-btn">
+            {{ volunteer ? 'Mettre à jour' : 'Ajouter' }}
+          </button>
           <button
             type="button"
             class="submit-btn"

@@ -73,8 +73,8 @@
             </p>
             <div class="association-footer">
               <span class="points-required"></span>
-              <buttton class="donate-btn"
-                ><svg
+              <button class="donate-btn">
+                <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
                   height="16"
@@ -92,7 +92,7 @@
                   ></path>
                 </svg>
                 <span>Faire un don</span>
-              </buttton>
+              </button>
             </div>
           </div>
         </div>
@@ -107,8 +107,8 @@
             </p>
             <div class="association-footer">
               <span class="points-required"></span>
-              <buttton class="donate-btn"
-                ><svg
+              <button class="donate-btn">
+                <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
                   height="16"
@@ -126,7 +126,7 @@
                   ></path>
                 </svg>
                 <span>Faire un don</span>
-              </buttton>
+              </button>
             </div>
           </div>
         </div>
