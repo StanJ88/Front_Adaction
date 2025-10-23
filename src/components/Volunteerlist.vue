@@ -3,18 +3,13 @@ import { computed, ref, onMounted } from 'vue'
 import { Pen, Trash2 } from 'lucide-vue-next'
 import AddVolunteer from './AddVolunteer.vue'
 import TheHeader from './TheHeader.vue'
-import NavBar from './NavBar.vue'
-import TheFooter from './TheFooter.vue'
 import NavBarAdmin from './NavBarAdmin.vue'
+import TheFooter from './TheFooter.vue'
+import ConfirmDialog from './ConfirmDialog.vue'
 
 const showModal = ref(false)
 const editingVolunteer = ref(null)
 const volunteers = ref([])
-
-const editVolunteer = (volunteer) => {
-  editingVolunteer.value = { ...volunteer }
-  showModal.value = true
-}
 
 // Recherche
 const searchQuery = ref('')
@@ -24,16 +19,32 @@ const selectedCity = ref('Toutes les villes')
 async function fetchVolunteers() {
   try {
     const response = await fetch('http://localhost:8081/api/volunteers')
-    const data = await response.json()
-    volunteers.value = data
+    volunteers.value = await response.json()
   } catch (error) {
     console.error('Erreur :', error)
   }
 }
 
-onMounted(() => {
-  fetchVolunteers()
-})
+// Fetch un bénévole par id
+async function fetchVolunteerById(id) {
+  try {
+    const response = await fetch(`http://localhost:8081/api/volunteers/${id}`)
+    if (!response.ok) throw new Error('Erreur API volunteer')
+    return await response.json()
+  } catch (error) {
+    console.error('Impossible de récupérer le bénévole :', error)
+    return null
+  }
+}
+
+// Pré-remplir le formulaire pour l'édition
+const editVolunteer = async (volunteer) => {
+  const fullData = await fetchVolunteerById(volunteer.id)
+  if (fullData) {
+    editingVolunteer.value = { ...fullData }
+    showModal.value = true
+  }
+}
 
 // Liste filtrée selon recherche et ville
 const filteredVolunteers = computed(() => {
@@ -47,7 +58,7 @@ const filteredVolunteers = computed(() => {
   })
 })
 
-//  Ajout ou mise à jour
+// Ajout ou mise à jour
 const addOrUpdateVolunteer = async (formValue) => {
   try {
     const volunteerForm = {
@@ -58,9 +69,8 @@ const addOrUpdateVolunteer = async (formValue) => {
       city: { id: formValue.cityId },
     }
 
-    if (editingVolunteer.value) {
-      //  Mode édition  PUT
-
+    if (editingVolunteer.value?.id) {
+      // Edition PUT
       const response = await fetch(
         `http://localhost:8081/api/volunteers/${editingVolunteer.value.id}`,
         {
@@ -70,51 +80,65 @@ const addOrUpdateVolunteer = async (formValue) => {
         },
       )
 
-      const updatedVolunteer = await response.json()
-      const index = volunteers.value.findIndex((v) => v.id === editingVolunteer.value.id)
-      if (index !== -1) {
-        volunteers.value[index] = updatedVolunteer
+      if (response.ok) {
+        // On récupère la liste à jour depuis le backend
+        await fetchVolunteers()
+      } else {
+        const errText = await response.text()
+        console.error('Erreur PUT :', errText)
       }
     } else {
-      //  Mode ajout  POST
+      // Ajout POST
       const response = await fetch('http://localhost:8081/api/volunteers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(volunteerForm),
       })
-
       const newVolunteer = await response.json()
       volunteers.value.push(newVolunteer)
     }
 
-    //  Ferme la fenêtre modal et réinitialise
     showModal.value = false
     editingVolunteer.value = null
   } catch (error) {
     console.error('Erreur lors de l’ajout ou de la modification :', error)
   }
 }
-const deleteVolunteer = async (id) => {
-  try {
-    // confirmation avant suppression
-    const confirmDelete = window.confirm('Es-tu sûr de vouloir supprimer ce bénévole ?')
-    if (!confirmDelete) return
+// Suppression
+const showConfirm = ref(false)
+const volunteerToDelete = ref(null)
 
+const requestDelete = (volunteer) => {
+  volunteerToDelete.value = volunteer
+  showConfirm.value = true
+}
+
+const confirmDelete = async () => {
+  if (!volunteerToDelete.value) return
+
+  try {
+    const id = volunteerToDelete.value.id
     const response = await fetch(`http://localhost:8081/api/volunteers/${id}`, {
       method: 'DELETE',
     })
 
     if (response.ok) {
-      // Suppression côté frontend
-      volunteers.value = volunteers.value.filter((volunteer) => volunteer.id !== id)
-      console.log(`Bénévolesupprimé avec succès.`)
+      volunteers.value = volunteers.value.filter((v) => v.id !== id)
+      console.log(`Bénévole supprimé avec succès.`)
     } else {
-      console.error('Erreur lors de la suppression du bénévole :', response.statusText)
+      console.error('Erreur lors de la suppression :', response.statusText)
     }
   } catch (error) {
     console.error('Erreur lors de la suppression :', error)
+  } finally {
+    showConfirm.value = false
+    volunteerToDelete.value = null
   }
 }
+
+onMounted(() => {
+  fetchVolunteers()
+})
 </script>
 
 <template>
@@ -122,6 +146,13 @@ const deleteVolunteer = async (id) => {
     <TheHeader />
   </header>
   <NavBarAdmin />
+  <ConfirmDialog
+    v-if="showConfirm"
+    title="Supprimer un bénévole"
+    :message="`Es-tu sûr de vouloir supprimer ${volunteerToDelete?.firstname} ${volunteerToDelete?.lastname} ?`"
+    @confirm="confirmDelete"
+    @cancel="showConfirm = false"
+  />
   <main>
     <div class="main-content">
       <div class="card">
@@ -164,7 +195,7 @@ const deleteVolunteer = async (id) => {
               <button class="action-btn edit-btn" @click="editVolunteer(volunteer)">
                 <Pen />
               </button>
-              <button class="action-btn delete-btn" @click="deleteVolunteer(volunteer.id)">
+              <button class="action-btn delete-btn" @click="requestDelete(volunteer)">
                 <Trash2 />
               </button>
             </div>
@@ -174,6 +205,7 @@ const deleteVolunteer = async (id) => {
         </div>
         <AddVolunteer
           v-if="showModal"
+          :volunteer="editingVolunteer"
           @submitForm="addOrUpdateVolunteer"
           @close="
             () => {

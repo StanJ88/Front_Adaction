@@ -30,12 +30,12 @@ const router = createRouter({
   routes,
 })
 
-// 🧩 Garde de navigation
+//  Garde de navigation
 router.beforeEach((to, from, next) => {
   const role = localStorage.getItem('role')
   const isAdminRoute = to.path.startsWith('/admin')
 
-  // 🔒 Si c'est une route admin mais que l'utilisateur n'est pas admin → login
+  //  Si c'est une route admin mais que l'utilisateur n'est pas admin → login
   if (isAdminRoute && role !== 'ADMIN') {
     next('/login')
   } else {
